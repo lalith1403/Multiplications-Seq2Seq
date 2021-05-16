@@ -37,8 +37,8 @@ class GenerateDataset():
                 handle.write(text + " " + str(data) + "\n")
 
 
-VOCAB_FILENAME = "vocabulary.pkl"
-DATA_FILENAME = "multiplication_pairs.txt"
+VOCAB_FILENAME = "./data/vocabulary.pkl"
+DATA_FILENAME = "./data/multiplication_pairs.txt"
 generated_dataset = GenerateDataset(VOCAB_FILENAME, DATA_FILENAME, 0, 100000, 1)
 
 generated_dataset.write_product_to_file()

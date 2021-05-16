@@ -72,22 +72,24 @@ class PreprocessDataset():
                 self.data[i][j] = self.token_idx[self.data[i][j]]
 
 
-FILE_NAME = 'multiplication_pairs.txt'
+FILE_NAME = './data/multiplication_pairs.txt'
+
 preprocess_dataset = PreprocessDataset(FILE_NAME)
 preprocess_dataset.load_data()
 preprocess_dataset.preprocess_data()
 preprocess_dataset.generate_targets()
 preprocess_dataset.generate_vocabulary()
 preprocess_dataset.generate_token_idx()
-# print(preprocess_dataset.unique_tokens)
 preprocess_dataset.pad_sentences()
 preprocess_dataset.replace_words_with_idx()
 data = preprocess_dataset.data
+
 data = torch.LongTensor(data)
-torch.save(data,'data.pt')
+torch.save(data,'./data/data.pt')
 targets = preprocess_dataset.target
 targets = torch.LongTensor(targets)
-torch.save(targets,'targets.pt')
+torch.save(targets,'./data/targets.pt')
 print(preprocess_dataset.token_idx)
-with open("token_idx.pkl",'wb') as handle:
+
+with open("./data/token_idx.pkl",'wb') as handle:
     pickle.dump(preprocess_dataset.token_idx, handle, protocol=pickle.HIGHEST_PROTOCOL)
