@@ -1,95 +1,32 @@
-import re 
-import random 
-import torch
 import pickle
 
-class PreprocessDataset():
-    """Class to Preprocess Dataset present at file_name
+def load_data(vocab_file_name, data_file_name):
     """
-    def __init__(self, file_name):
-        self.file_name = file_name
-        self.data = []
-        self.unique_tokens = ['<unk>','<pad>']
-        self.target = []
-        self.token_idx = {} 
-        self.MAX_LENGTH = 0
+    Load the dataset from the pickle file and separate it into inputs and targets.
 
-    def load_data(self):
-        """load data from the data file
+    Args:
+    - vocab_file_name (str): The path to the vocabulary pickle file.
+    - data_file_name (str): The path to the data pickle file containing sentences and products.
 
-        Returns:
-            list: list of all data pairs 
-        """
-        data = open(self.file_name, 'r',encoding='utf8')
-        data = data.readlines()
-        return data
+    Returns:
+    - sentences (list): A list of sentences (inputs).
+    - products (list): A list of products (targets).
+    """
+    # Load the vocabulary
+    with open(vocab_file_name, 'rb') as vocab_file:
+        vocabulary = pickle.load(vocab_file)
     
-    def preprocess_data(self):
-        """Preprocess dataset
-        """
-        unprocessed_data = self.load_data()
-        for _, pair in enumerate(unprocessed_data):
-            self.data.append(re.split('-| |', pair))
+    # Load the data
+    with open(data_file_name, 'rb') as data_file:
+        data_list = pickle.load(data_file)
     
-    def generate_targets(self):
-        """get the output of multiplication
-        """
-        for pair in self.data:
-            target = pair.pop()
-            self.target.append(int(target))
-
-
-        for i in self.data:
-            self.MAX_LENGTH = max(len(i), self.MAX_LENGTH)
+    # Separate the sentences and products
+    sentences, products = zip(*data_list)  # This unzips the list of tuples into two lists
     
-    def random_data_display(self):
-        """Randomly display data from the preprocessed dataset
-        """
-        num = random.randint(0, len(self.data))
-        print(self.data[num])
+    return list(sentences), list(products)
 
-    def generate_vocabulary(self):
-        """generate the unique tokens
-        """
-        for indv_sentence in self.data:
-            for indv_token in indv_sentence[:-1]:
-                if indv_token not in self.unique_tokens:
-                    self.unique_tokens.append(indv_token)
-    
-    def generate_token_idx(self):
-        "generate token_idx dictionary"
-        for id, token in enumerate(self.unique_tokens):
-            self.token_idx[token] = id 
-    
-    def pad_sentences(self):
-       for i in range(len(self.data)):
-           length = len(self.data[i])
-           self.data[i] += ["<pad>" for _ in range (self.MAX_LENGTH - length)] 
-
-    def replace_words_with_idx(self):
-        for i in range(len(self.data)):
-            for j in range(self.MAX_LENGTH):
-                self.data[i][j] = self.token_idx[self.data[i][j]]
-
-
-FILE_NAME = './data/multiplication_pairs.txt'
-
-preprocess_dataset = PreprocessDataset(FILE_NAME)
-preprocess_dataset.load_data()
-preprocess_dataset.preprocess_data()
-preprocess_dataset.generate_targets()
-preprocess_dataset.generate_vocabulary()
-preprocess_dataset.generate_token_idx()
-preprocess_dataset.pad_sentences()
-preprocess_dataset.replace_words_with_idx()
-data = preprocess_dataset.data
-
-data = torch.LongTensor(data)
-torch.save(data,'./data/data.pt')
-targets = preprocess_dataset.target
-targets = torch.LongTensor(targets)
-torch.save(targets,'./data/targets.pt')
-print(preprocess_dataset.token_idx)
-
-with open("./data/token_idx.pkl",'wb') as handle:
-    pickle.dump(preprocess_dataset.token_idx, handle, protocol=pickle.HIGHEST_PROTOCOL)
+if __name__ == "__main__":
+    vocab_filename = "./data/vocabulary.pkl"
+    data_filename = "./data/multiplication_pairs.pkl"  # Assuming the data is saved in a .pkl file
+    sentences, products = load_data(vocab_filename, data_filename)
+    print(f"Loaded {len(sentences)} sentences and {len(products)} products.")
